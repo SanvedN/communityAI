@@ -1,0 +1,6 @@
+# Web Framework
+fastapi==0.95.2
+uvicorn==0.22.0
+
+# Frontend
+streamlit==1.23.1
