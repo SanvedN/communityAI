@@ -40,11 +40,16 @@ class ModerationService:
         # Convert bytes to PIL Image
         image = Image.open(io.BytesIO(image_data))
 
+        # Convert the PIL image to bytes for NudeDetector
+        image_bytes = io.BytesIO()
+        image.save(image_bytes, format="JPEG")
+        image_bytes = image_bytes.getvalue()
+
         # Calculate image hash for AI detection
         img_hash = str(imagehash.average_hash(image))
 
-        # NSFW detection
-        nsfw_result = self.nude_detector.detect(image)
+        # NSFW detection (pass image as bytes)
+        nsfw_result = self.nude_detector.detect(image_bytes)
 
         # Manipulation detection
         manipulation_score = self.detect_image_manipulation(image)

@@ -84,7 +84,10 @@ class AudioService:
     def detect_speakers(self, audio_data: bytes) -> List[Tuple[str, float, float]]:
         from pyannote.audio import Pipeline
 
-        pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization")
+        pipeline = Pipeline.from_pretrained(
+            "pyannote/speaker-diarization",
+            use_auth_token="HF_ACCESS_TOKEN",
+        )
 
         temp_file = "temp_audio.wav"
         with wave.open(temp_file, "wb") as wf:
