@@ -8,6 +8,8 @@ import imagehash
 import librosa
 from typing import Dict, Union, Tuple
 import io
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+import torch
 
 
 class ModerationService:
@@ -32,7 +34,7 @@ class ModerationService:
         return {
             "sentiment": sentiment,
             "toxicity": toxicity,
-            "is_ai_generated": ai_indicators > 0.7,
+            "is_ai_generated": ai_indicators,
             "is_inappropriate": any(score["score"] > 0.7 for score in toxicity),
         }
 
@@ -119,16 +121,10 @@ class ModerationService:
             "ai_generated_frame_ratio": ai_generated_frames / total_analyzed,
         }
 
-    def detect_ai_text(self, text: str) -> float:
-        indicators = [
-            len(text.split()) > 100,  # Length
-            len(set(text.split())) / len(text.split()) < 0.6,  # Vocabulary diversity
-            text.count(".") / len(text.split()) > 0.1,  # Sentence structure
-            any(
-                phrase in text.lower() for phrase in ["as an ai", "as a language model"]
-            ),  # Common AI phrases
-        ]
-        return sum(indicators) / len(indicators)
+    def detect_ai_text(self, text: str):
+        pipe = pipeline("text-classification", model="roberta-base-openai-detector")
+        result = pipe(text)
+        return result
 
     def detect_ai_image(self, image: Image) -> bool:
         img_array = np.array(image)

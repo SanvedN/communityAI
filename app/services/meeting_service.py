@@ -28,7 +28,7 @@ class MeetingService:
         except:
             # If response is not JSON, create structured format
             analysis = {
-                "summary": response.text[:500],
+                "summary": response.text,
                 "action_items": [],
                 "discussion_points": [],
                 "participants": {},
