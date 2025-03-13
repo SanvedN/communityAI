@@ -17,7 +17,7 @@ moderation_service = ModerationService()
 audio_service = AudioService()
 meeting_service = MeetingService()
 
-TOKEN = "MTM0NzE5NTM5MDM4NjI0NTcwMw.GQkCVO.FPr2ALTRFGjaD7szokYb0teTqNnxZdNJL4p4L0"
+TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 intents.message_content = True
