@@ -17,8 +17,6 @@ moderation_service = ModerationService()
 audio_service = AudioService()
 meeting_service = MeetingService()
 
-TOKEN = os.getenv("TOKEN")
-
 intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
@@ -255,4 +253,4 @@ async def mom_from_file(ctx):
 # -------------------------------
 # RUN BOT
 # -------------------------------
-bot.run(TOKEN)
+bot.run(os.getenv("TOKEN"))
