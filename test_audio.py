@@ -44,11 +44,6 @@ def perform_analysis(
     transcript_text = "\n".join([segment["text"] for segment in transcription])
     print("Transcription completed.")
 
-    # # Step 2: Perform speaker diarization
-    # print("Detecting speakers...")
-    # speaker_segments = audio_service.detect_speakers(audio_data)
-    # print("Speaker detection completed.")
-
     # Step 3: Analyze the meeting
     print("Analyzing meeting summary...")
     summary = meeting_service.generate_summary(transcript_text)
@@ -57,10 +52,6 @@ def perform_analysis(
     print("Extracting action items...")
     action_items = meeting_service.extract_action_items(transcript_text)
     print("Action items extracted.")
-
-    # print("Analyzing participants' contributions...")
-    # participation_analysis = meeting_service.analyze_participation(speaker_segments)
-    # print("Participation analysis completed.")
 
     # Output results
     print("\n--- Meeting Summary ---")
@@ -71,11 +62,6 @@ def perform_analysis(
         print(
             f"Action: {item.get('action')}, Responsible: {item.get('responsible')}, Deadline: {item.get('deadline')}"
         )
-    # print("\n--- Participation Analysis ---")
-    # for participant, data in participation_analysis.items():
-    #     print(
-    #         f"Speaker: {participant}, Total Time: {data['total_time']}s, Speaking Turns: {data['speaking_turns']}"
-    #     )
 
 
 def main():

@@ -7,7 +7,7 @@ import json
 class MeetingService:
     def __init__(self):
         genai.configure(api_key=settings.GOOGLE_API_KEY)
-        self.model = genai.GenerativeModel("gemini-pro")
+        self.model = genai.GenerativeModel("gemini-2.0-flash")
 
     def generate_summary(self, transcript: str) -> Dict:
         prompt = f"""
@@ -58,24 +58,3 @@ class MeetingService:
             action_items = []
 
         return action_items
-
-    def analyze_participation(self, speaker_segments: List[Dict]) -> Dict:
-        # Calculate speaking time and contributions per participant
-        participation = {}
-
-        for segment in speaker_segments:
-            speaker = segment["speaker"]
-            duration = segment["end_time"] - segment["start_time"]
-
-            if speaker not in participation:
-                participation[speaker] = {
-                    "total_time": 0,
-                    "speaking_turns": 0,
-                    "segments": [],
-                }
-
-            participation[speaker]["total_time"] += duration
-            participation[speaker]["speaking_turns"] += 1
-            participation[speaker]["segments"].append(segment)
-
-        return participation

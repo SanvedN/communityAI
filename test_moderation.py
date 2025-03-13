@@ -1,7 +1,13 @@
 import os
-from typing import Optional
 import io
+import wave
+import shutil
+import tempfile
+import sounddevice as sd
+import numpy as np
 from app.services.moderation_service import ModerationService
+from PIL import Image
+import time  # Import time module for potential delays
 
 
 def get_media_input_option():
@@ -14,16 +20,8 @@ def get_media_input_option():
     return choice
 
 
-def get_file_path(file_type: str) -> Optional[str]:
+def get_file_path(file_type: str):
     file_path = input(f"Enter the path to the {file_type} file: ").strip()
-
-    # Remove extra quotes if present (if user adds them by mistake)
-    if file_path.startswith('"') and file_path.endswith('"'):
-        file_path = file_path[1:-1]
-
-    # Debugging output
-    print(f"Debug: Checking if file exists at path: {file_path}")
-
     if os.path.isfile(file_path):
         return file_path
     else:
@@ -33,65 +31,56 @@ def get_file_path(file_type: str) -> Optional[str]:
         return None
 
 
-def analyze_text_input(moderation_service: ModerationService):
+def analyze_text_input(moderation_service):
     text = input("Enter the text to analyze: ")
-    analysis_result = moderation_service.analyze_text(text)
-    print("\n--- Text Analysis ---")
-    print(f"Sentiment: {analysis_result['sentiment']}")
-    print(f"Toxicity: {analysis_result['toxicity']}")
-    print(f"AI Generated: {analysis_result['is_ai_generated']}")
-    print(f"Inappropriate: {analysis_result['is_inappropriate']}")
+    if text:
+        result = moderation_service.analyze_text(text)
+        print("\n--- Text Analysis ---")
+        print(result)
 
 
-def analyze_image_input(moderation_service: ModerationService):
+def analyze_image_input(moderation_service):
     image_path = get_file_path("image")
     if image_path:
-        with open(image_path, "rb") as img_file:
-            image_data = img_file.read()
-            analysis_result = moderation_service.analyze_image(image_data)
-            print("\n--- Image Analysis ---")
-            print(f"Inappropriate: {analysis_result['is_inappropriate']}")
-            print(f"AI Generated: {analysis_result['is_ai_generated']}")
-            print(f"Manipulation Score: {analysis_result['manipulation_score']}")
-            print(f"NSFW Details: {analysis_result['nsfw_details']}")
+        with Image.open(image_path) as image:
+            result = moderation_service.analyze_image(image)
+        print("\n--- Image Analysis ---")
+        print(result)
 
 
-def analyze_audio_input(moderation_service: ModerationService):
+def analyze_audio_input(moderation_service):
     audio_path = get_file_path("audio")
     if audio_path:
-        with open(audio_path, "rb") as audio_file:
-            audio_data = audio_file.read()
-            analysis_result = moderation_service.analyze_audio(audio_data)
-            print("\n--- Audio Analysis ---")
-            print(f"AI Generated: {analysis_result['is_ai_generated']}")
-            print(f"MFCCs Mean: {analysis_result['audio_features']['mfccs_mean']}")
-            print(
-                f"Spectral Rolloff Mean: {analysis_result['audio_features']['spectral_rolloff_mean']}"
-            )
+        with open(audio_path, "rb") as file:
+            audio_data = file.read()
+        result = moderation_service.analyze_audio(audio_data)
+        print("\n--- Audio Analysis ---")
+        print(result)
 
 
-def analyze_video_input(moderation_service: ModerationService):
+def analyze_video_input(moderation_service):
     video_path = get_file_path("video")
     if video_path:
-        with open(video_path, "rb") as video_file:
-            video_data = video_file.read()
-            analysis_result = moderation_service.analyze_video(video_data)
-            print("\n--- Video Analysis ---")
-            print(
-                f"Inappropriate Frame Ratio: {analysis_result['inappropriate_frame_ratio']}"
-            )
-            print(
-                f"AI Generated Frame Ratio: {analysis_result['ai_generated_frame_ratio']}"
-            )
+        video_data = None  # Initialize video_data outside try block
+        try:
+            with open(video_path, "rb") as original_file:
+                video_data = original_file.read()
+        except Exception as e:
+            print(f"Error initially reading video file: {e}")
+            return  # Exit if we can't even read the file initially
+
+        if video_data:  # Proceed only if video_data was successfully read
+            try:
+                result = moderation_service.analyze_video(video_data)
+                print("\n--- Video Analysis ---")
+                print(result)
+            except Exception as e:
+                print(f"Error analyzing video: {e}")
 
 
 def main():
     moderation_service = ModerationService()
-
-    # Get media input option
     choice = get_media_input_option()
-
-    # Analyze based on the user's choice
     if choice == "1":
         analyze_text_input(moderation_service)
     elif choice == "2":
