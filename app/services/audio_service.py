@@ -57,6 +57,11 @@ class AudioService:
         return filepath
 
     def merge_audio_streams(self, audio_files: List[str]) -> bytes:
+        # If there's only one file, just read it directly
+        if len(audio_files) == 1:
+            with open(audio_files[0], "rb") as f:
+                return f.read()
+
         combined = AudioSegment.empty()
         for file in audio_files:
             segment = AudioSegment.from_file(file)
@@ -65,6 +70,7 @@ class AudioService:
         # Export as bytes
         audio_bytes = io.BytesIO()
         combined.export(audio_bytes, format="wav")
+        audio_bytes.seek(0)
 
         return audio_bytes.getvalue()
 
